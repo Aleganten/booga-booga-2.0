@@ -1,1 +1,1863 @@
+if game.PlaceId == 11879754496
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Booga Booga 2.0",
+   LoadingTitle = "Yes",
+   LoadingSubtitle = "by Alex",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = Boogabooga20, -- Create a custom folder for your hub/game
+      FileName = "WELOVEYOU"
+   },
+   Discord = {
+      Enabled = true,
+      Invite = "jb2t6dJJSM", -- The Discord invite code, do not include discord.gg/
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Booga Booga 2.0",
+      Subtitle = "Key System",
+      Note = "By Alex",
+      FileName = "KeyKey",
+      SaveKey = false,
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = "xela"
+   }
+})
+
+local Farm = Window:CreateTab("Farm", 4483362458) -- Title, Image
+local Heals = Window:CreateTab("Auto-Heal", 4483362458) -- Title, Image
+local pik = Window:CreateTab("Pickup", 4483362458) -- Title, Image
+local pr = Window:CreateTab("Player", 4483362458) -- Title, Image
+local st = Window:CreateTab("Structures", 4483362458) -- Title, Image
+
+-- Variables globales
+function autoheal(food)
+    local item = game:GetService("Players").LocalPlayer.PlayerGui.MainGui.RightPanel.Inventory.List[food].LayoutOrder
+
+    game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("UseBagltem"):FireServer(item)
+end
+
+
+function moveCharacter(positions, speed, tween, pauseTime)
+    local position = positions
+    local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+    local v = speed or getgenv().twsp -- velocidad por defecto si no se proporciona una
+    local w
+    local c = nil -- variable para el tween actual
+    
+    local startPos = n.Position -- posición inicial del personaje
+    
+    for i, pos in ipairs(position) do
+        local u = pos
+        
+        if pauseTime then
+            -- Si hay un tiempo de pausa, calcula el tiempo restante para el tween y crea un nuevo tween desde la posición actual hasta la siguiente posición
+            local remainingTime = math.max(0, w - (tick() - pauseTime))
+            w = remainingTime
+            startPos = n.Position
+            u = position[i+1]
+        else
+            -- Si no hay tiempo de pausa, calcula el tiempo normal para el tween
+            w = math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+        end
+        
+        c = game:GetService("TweenService"):Create(n,
+            TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+            {CFrame = u}
+        )
+        c:Play()
+        wait(w) -- Esperar a que termine la animación antes de continuar
+        
+        if not c.PlaybackState == Enum.PlaybackState.Completed then
+            -- Si el tween no ha terminado completamente, cancela el tween y establece el tiempo de pausa
+            c:Cancel()
+            tween = c
+            pauseTime = tick()
+            break
+        end
+    end
+end
+
+
+function tp(x, y, z)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(x, y, z)
+--Ejemplo
+--tp(135, -3, 761)
+end
+
+local lp = game.Players.LocalPlayer
+
+
+local Button = pr:CreateButton({
+    Name = "Hop Server",
+    Callback = function()
+        local ag = game.PlaceId
+        local ah = {}
+        local ai = ""
+        local aj = os.date("!*t").hour
+        local ak = false
+        local al =
+            pcall(
+            function()
+                ah = game:GetService("HttpService"):JSONDecode(readfile("NotSameServers.json"))
+            end
+        )
+        if not al then
+            table.insert(ah, aj)
+            writefile("NotSameServers.json", game:GetService("HttpService"):JSONEncode(ah))
+        end
+        function TPReturner()
+            local am
+            if ai == "" then
+                am =
+                    game.HttpService:JSONDecode(
+                    game:HttpGet(
+                        "https://games.roblox.com/v1/games/" .. ag .. "/servers/Public?sortOrder=Asc&limit=100"
+                    )
+                )
+            else
+                am =
+                    game.HttpService:JSONDecode(
+                    game:HttpGet(
+                        "https://games.roblox.com/v1/games/" ..
+                            ag .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. ai
+                    )
+                )
+            end
+            local an = ""
+            if am.nextPageCursor and am.nextPageCursor ~= "null" and am.nextPageCursor ~= nil then
+                ai = am.nextPageCursor
+            end
+            local ao = 0
+            for b, c in pairs(am.data) do
+                local ap = true
+                an = tostring(c.id)
+                if tonumber(c.maxPlayers) > tonumber(c.playing) then
+                    for aq, ar in pairs(ah) do
+                        if ao ~= 0 then
+                            if an == tostring(ar) then
+                                ap = false
+                            end
+                        else
+                            if tonumber(aj) ~= tonumber(ar) then
+                                local as =
+                                    pcall(
+                                    function()
+                                        delfile("NotSameServers.json")
+                                        ah = {}
+                                        table.insert(ah, aj)
+                                    end
+                                )
+                            end
+                        end
+                        ao = ao + 1
+                    end
+                    if ap == true then
+                        table.insert(ah, an)
+                        wait()
+                        pcall(
+                            function()
+                                writefile("NotSameServers.json", game:GetService("HttpService"):JSONEncode(ah))
+                                wait()
+                                game:GetService("TeleportService"):TeleportToPlaceInstance(
+                                    ag,
+                                    an,
+                                    game.Players.LocalPlayer
+                                )
+                            end
+                        )
+                        wait(4)
+                    end
+                end
+            end
+        end
+        function Teleport()
+            while wait() do
+                pcall(
+                    function()
+                        TPReturner()
+                        if ai ~= "" then
+                            TPReturner()
+                        end
+                    end
+                )
+            end
+        end
+        print("Hello?")
+        Teleport()
+    end,
+ })
+
+
+------------------------------------------------------
+local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local isActive = false
+local lastActiveTime = tick()
+
+local maxInactiveTime = 900 -- 15 minutos
+
+local function doAction()
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new())
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed then
+        lastActiveTime = tick()
+    end
+end)
+
+
+
+local function startAntiAFK()
+    isActive = true
+    while isActive do
+        if tick() - lastActiveTime >= maxInactiveTime then
+            doAction()
+            lastActiveTime = tick()
+        end
+        RunService.Heartbeat:Wait()
+    end
+end
+
+local function stopAntiAFK()
+    isActive = false
+end
+
+local Toggle = Farm:CreateToggle({
+    Name = "Anti AFK",
+    CurrentValue = false,
+    Flag = "Toggle33",
+    Callback = function(t)
+        if t then
+            startAntiAFK()
+        else
+            stopAntiAFK()
+        end
+    end,
+})
+
+local Input = Farm:CreateInput({
+    Name = "Food Name | Eat AFK",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().tplanstt = t
+    end,
+ })
+
+local Toggle = Farm:CreateToggle({
+    Name = "AFK Eat (This eat when ur hp is 99)",
+    CurrentValue = false,
+    Flag = "Toggle2",
+    Callback = function(t)
+        getgenv().tplaant = t
+        spawn(function()
+            while getgenv().tplaant == true and wait() do
+                if game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid").Health < 100 then
+                    for i=1, 1 do
+                        autoheal(getgenv().tplanstt) 
+                    wait(2)
+                    end
+                    end
+            end
+        end)
+    end,
+ })
+ 
+ local Input = Farm:CreateInput({
+    Name = "Fruit | Plant",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().tplantt = t
+    end,
+ })
+
+ local Toggle = Farm:CreateToggle({
+    Name = "Plant",
+    CurrentValue = false,
+    Flag = "Toggle3",
+    Callback = function(t)
+        getgenv().plantfruit = t
+
+        while getgenv().plantfruit == true and wait(.05) do
+            local plantBoxWithPart = {}
+
+            local player = game.Players.LocalPlayer
+            local deployables = workspace.Deployables
+            local excluded = {} 
+            
+            while wait() do
+            if getgenv().getgenv().plantfruit == true then
+                for i, v in pairs(deployables:GetChildren()) do
+                    if v.Name == "Plant Box" and not excluded[v] then
+                        if not v:FindFirstChild(getgenv().tplantt) then
+                            if (player.Character.HumanoidRootPart.Position - v:FindFirstChildWhichIsA("BasePart").Position).magnitude < 17 then
+                                local a = {[1] = v, [2] = getgenv().tplantt}
+                                game:GetService("ReplicatedStorage").Events.lnteractStructure:FireServer(unpack(a))
+                                excluded[v] = true
+                                wait(0)
+                                excluded[v] = false
+                            end
+                        end
+                    end
+                end
+            end
+            end
+            
+        end             
+    end,
+ })
+
+ local Slider = Farm:CreateSlider({
+    Name = "Magnitude | Harvest",
+    Range = {0, 60},
+    Increment = 0.1,
+    Suffix = "Range",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+        getgenv().magnitudepaso = t
+    end,
+ })
+
+ local Toggle = Farm:CreateToggle({
+    Name = "Harvest",
+    CurrentValue = false,
+    Flag = "Toggle4",
+    Callback = function(m)
+        getgenv().autoharvest = m
+        if m then
+            spawn(
+                function()
+                    while autoharvest do
+                        wait()
+                        pcall(
+                            function()
+                                spawn(
+                                    function()
+                                        local S = getgenv().magnitudepaso, nil
+                                        local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                        for b, c in pairs(game:GetService("Workspace"):GetChildren()) do
+                                            if c:FindFirstChild("Pickup") and c:IsA("Model") then
+                                                if
+                                                    (n.Position - c:FindFirstChildWhichIsA("BasePart").Position).Magnitude <
+                                                        S
+                                                 then
+                                                    game:GetService("ReplicatedStorage").Events.Pickup:FireServer(
+                                                        c
+                                                    )
+                                                    S =
+                                                        (n.Position -
+                                                        c:FindFirstChildWhichIsA("BasePart").Position).Magnitude
+                                                end
+                                            end
+                                        end
+                                    end
+                                )
+                            end
+                        )
+                    end
+                end
+            )
+        end
+    end,
+ })
+
+ local Slider = Farm:CreateSlider({
+    Name = "Magnitude Tween Harverest",
+    Range = {60, 5000},
+    Increment = 0.1,
+    Suffix = "Range, tween",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+        getgenv().magnitudepaso1 = t
+    end,
+ })
+
+ local Slider = Farm:CreateSlider({
+    Name = "Speed Tween Harverest",
+    Range = {1, 20},
+    Increment = 0.1,
+    Suffix = "Speed, tween",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+        getgenv().speedtweenharv = t
+    end,
+ })
+
+
+ local Toggle = Farm:CreateToggle({
+    Name = "Tween to Harverest",
+    CurrentValue = false,
+    Flag = "Toggle5",
+    Callback = function(m)
+        getgenv().autoharvesttp = m
+        if m then
+            spawn(
+                function()
+                    while autoharvesttp do
+                        wait()
+                        pcall(
+                            function()
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                function getNear()
+                                    local R
+                                    local S = getgenv().magnitudepaso1, nil
+                                    for b, c in pairs(game:GetService("Workspace"):GetChildren()) do
+                                        if c:FindFirstChild("Pickup") and c:IsA("Model") then
+                                            if
+                                                (n.Position - c:FindFirstChildWhichIsA("BasePart").Position).Magnitude <
+                                                    S
+                                             then
+                                                R = c:FindFirstChildWhichIsA("BasePart")
+                                                S =
+                                                    (n.Position - c:FindFirstChildWhichIsA("BasePart").Position).Magnitude
+                                            end
+                                        end
+                                    end
+                                    return R
+                                end
+                                local U = getNear()
+                                local u = U.CFrame + Vector3.new(0, U.Size.Y, 0)
+                                local v = getgenv().speedtweenharv
+                                local w =
+                                    math.round(math.abs((n.Position - U.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                game:GetService("ReplicatedStorage").Events.Pickup:FireServer(U.Parent)
+                                x:Play()
+                            end
+                        )
+                    end
+                end
+            )
+        end
+    end,
+ })
+
+ local Slider = Farm:CreateSlider({
+    Name = "4 Gold Nodes Speed | 4 Nodes",
+    Range = {1, 30},
+    Increment = 0.1,
+    Suffix = "Speed",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+        getgenv().twsp = t
+    end,
+ })
+
+ local Toggle = Farm:CreateToggle({
+    Name = "Gold (Ice 4 Nodes)",
+    CurrentValue = false,
+    Flag = "Toggle6",
+    Callback = function(t)
+        getgenv().orofarm = t
+        local tween = nil -- Variable para almacenar el tween actual
+        local pauseTime = nil -- Variable para almacenar el tiempo de pausa del tween actual
+        while getgenv().orofarm and wait() do
+            local positions = {
+                [1] = CFrame.new(965, -3, -1387),
+                [2] = CFrame.new(915, -3, -1384),
+                [3] = CFrame.new(910, -1, -1422),
+                [4] = CFrame.new(949, -3, -1438),
+            }
+            moveCharacter(positions, getgenv().twsp, tween, pauseTime) -- mueve el personaje a las posiciones con una velocidad de 15 y la referencia del tween actual y el tiempo de pausa actual
+            if not getgenv().orofarm then
+                -- Si orofarm es fals o, cancela el tween actual y establece el personaje en su posición actual
+                if tween then
+                    tween:Cancel()
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                end
+            end
+        end
+    end,
+})
+
+
+
+
+
+local Toggle = Farm:CreateToggle({
+    Name = "Rec TP",
+    CurrentValue = false,
+    Flag = "Toggle7",
+    Callback = function(t)
+        getgenv().tp1c = t
+        spawn(function()
+                _G.SetFarmPos = t
+             
+                if _G.SetFarmPos then
+                    print("wsp")
+                    n = 1
+               _G.farmarray = {}
+                end
+               while _G.SetFarmPos and wait(.5) do
+                   print(n)
+               _G.farmarray[n] =  game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame
+               n = n + 1 
+               end
+        end)
+    end,
+ })
+
+ local Toggle = Farm:CreateToggle({
+    Name = "Start TP",
+    CurrentValue = false,
+    Flag = "Toggle8",
+    Callback = function(Value)
+        _G.autofarmfruit = Value
+        _G.farmarraylength = #(_G.farmarray)
+            print("Farm array length = ", farmarraylength)
+        while _G.autofarmfruit and wait() do
+for i = 1, _G.farmarraylength do
+    if _G.autofarmfruit == false then
+        i = 0 
+        _G.farmarraylength = 0
+    end
+    
+    print(i)
+    print(_G.farmarraylength)
+    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = _G.farmarray[i]
+    wait(.8)
+end  
+end
+    end,
+ })
+
+ local Label = Farm:CreateLabel("TP Points 2")
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 1",
+    Callback = function()
+        D = nil
+        wait()
+        D = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 2",
+    Callback = function()
+        E = nil
+        wait()
+        E = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 3",
+    Callback = function()
+        F = nil
+        wait()
+        F = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 4",
+    Callback = function()
+        G = nil
+        wait()
+        G = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 5",
+    Callback = function()
+        H = nil
+        wait()
+        H = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 6",
+    Callback = function()
+        I = nil
+        wait()
+        I = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 7",
+    Callback = function()
+        J = nil
+        wait()
+        J = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 8",
+    Callback = function()
+        K = nil
+        wait()
+        K = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 9",
+    Callback = function()
+        L = nil
+        wait()
+        L = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 10",
+    Callback = function()
+        M = nil
+        wait()
+        M = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 11",
+    Callback = function()
+        N = nil
+        wait()
+        N = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 12",
+    Callback = function()
+        O = nil
+        wait()
+        O = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 13",
+    Callback = function()
+        P = nil
+        wait()
+        P = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 14",
+    Callback = function()
+        Q = nil
+        wait()
+        Q = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 15",
+    Callback = function()
+        R = nil
+        wait()
+        R = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 16",
+    Callback = function()
+        S = nil
+        wait()
+        S = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 17",
+    Callback = function()
+        T = nil
+        wait()
+        T = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 18",
+    Callback = function()
+        U = nil
+        wait()
+        U = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 19",
+    Callback = function()
+        V = nil
+        wait()
+        V = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 20",
+    Callback = function()
+        W = nil
+        wait()
+        W = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 21",
+    Callback = function()
+        X = nil
+        wait()
+        X = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 22",
+    Callback = function()
+        Y = nil
+        wait()
+        Y = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Button = Farm:CreateButton({
+    Name = "Position - 23",
+    Callback = function()
+        Z = nil
+        wait()
+        Z = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+    end,
+ })
+
+ local Slider = Farm:CreateSlider({
+    Name = "Position Speed",
+    Range = {10, 20},
+    Increment = 0.1,
+    Suffix = "Speed between tps",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+getgenv().speedpos = t
+    end,
+ })
+
+ local Toggle = Farm:CreateToggle({
+    Name = "Start TP Points",
+    CurrentValue = false,
+    Flag = "Toggle9",
+    Callback = function(m)
+        getgenv().autotpselectedposv3 = m
+        if m then
+            spawn(
+                function()
+                    while autotpselectedposv3 do
+                        wait()
+                        pcall(
+                            function()
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = D
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = E
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = F
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = G
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = H
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = I
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = J
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = K
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = L
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = M
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = O
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = P
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = Q
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = R
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = S
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = T
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = U
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = V
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = W
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = X
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = Y
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                                wait(w)
+                                local n = game.Players.LocalPlayer.Character.HumanoidRootPart
+                                local u = Z
+                                local v = getgenv().speedpos
+                                local w =
+                                    math.round(math.abs((n.Position - u.Position).Magnitude)) / tonumber(v)
+                                local x =
+                                    game:GetService("TweenService"):Create(
+                                    n,
+                                    TweenInfo.new(tonumber(w), Enum.EasingStyle.Linear),
+                                    {CFrame = u}
+                                )
+                                x:Play()
+                            end
+                        )
+                    end
+                end
+            )
+    end
+    end,
+ })
+
+local Toggle = pik:CreateToggle({
+    Name = "Pickup Coins",
+    CurrentValue = false,
+    Flag = "Toggle10",
+    Callback = function(t)
+        getgenv().pickcoin = t
+        spawn(function()
+            while getgenv().pickcoin == true and wait() do
+                wait()
+                pcall(
+                    function()
+                        local n = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+                        local o = game:GetService("ReplicatedStorage")
+                        for b, c in pairs(game:GetService("Workspace").ItemDrops:GetChildren()) do
+                            if c:FindFirstChild("Pickup") then
+                                if c:IsA("BasePart") or c:IsA("UnionOpreation") then
+                                    if c.Name == "Coin2" then
+                                        if (n.Position - c.Position).Magnitude < 50 then
+                                            game:GetService("ReplicatedStorage").Events.Pickup:FireServer(
+                                                c
+                                            )
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        for b, c in pairs(game:GetService("Workspace").ItemDrops:GetChildren()) do
+                            if c:FindFirstChild("Pickup") then
+                                if c:IsA("BasePart") or c:IsA("UnionOpreation") then
+                                    if c.Name == "Coin2" then
+                                        if (n.Position - c.Position).Magnitude < 50 then
+                                            game:GetService("ReplicatedStorage").Events.Pickup:FireServer(
+                                                c
+                                            )
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end)
+            end
+        end)
+    end,
+ })
+
+ local Toggle = pik:CreateToggle({
+    Name = "Pickup Chest Item",
+    CurrentValue = false,
+    Flag = "Toggle11",
+    Callback = function(t)
+        getgenv().pickchest = t
+        spawn(function()
+            while getgenv().pickchest == true and wait() do
+                wait()
+                pcall(
+                    function()
+                        for i, v in pairs(game:GetService("Workspace").Deployables:GetChildren()) do
+                            if v.Name:find("Chest") then
+                        if (v.PrimaryPart.Position - game:GetService("Players").LocalPlayer.Character.UpperTorso.Position).magnitude < 50 then
+                        for i, c in pairs(v.Contents:GetChildren()) do
+                            if c:IsA("Part") or c:IsA("UnionOperation") or c:IsA("Model") or c:IsA("MeshPart") then
+                        game:GetService("ReplicatedStorage").Events.Pickup:FireServer(c)
+                        end
+                        end
+                        end
+                        end
+                        end
+                    end)
+            end
+        end)
+    end,
+ })
+
+ local Toggle = pik:CreateToggle({
+    Name = "Pickup Whitelist",
+    CurrentValue = false,
+    Flag = "Toggle12",
+    Callback = function(t)
+        getgenv().pickw = t
+        spawn(function()
+            while getgenv().pickw == true and wait() do
+                pcall(
+                    function()
+                        local n = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+                        local o = game:GetService("ReplicatedStorage")
+                        for b, c in pairs(game:GetService("Workspace"):GetChildren()) do
+                            if c:FindFirstChild("Pickup") then
+                                if c:IsA("BasePart") or c:IsA("UnionOpreation") then
+                                    if c.Name == getgenv().getitem then
+                                        if (n.Position - c.Position).Magnitude < 50 then
+                                            game:GetService("ReplicatedStorage").Events.Pickup:FireServer(
+                                                c
+                                            )
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        for b, c in pairs(game:GetService("Workspace").Items:GetChildren()) do
+                            if c:FindFirstChild("Pickup") then
+                                if c:IsA("BasePart") or c:IsA("UnionOpreation") then
+                                    if c.Name == getgenv().getitem1 or c.Name == getgenv().getitem2 or c.Name == getgenv().getitem3 or c.Name == getgenv().getitem4 or c.Name == getgenv().getitem5 or c.Name == getgenv().getitem6 or c.Name == getgenv().getitem7 then
+                                        if (n.Position - c.Position).Magnitude < 50 then
+                                            game:GetService("ReplicatedStorage").Events.Pickup:FireServer(
+                                                c
+                                            )
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end)
+            end
+        end)
+    end,
+ })
+
+ local Input = pik:CreateInput({
+    Name = "Whitelist 1",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().getitem1 = t
+    end,
+ })
+
+ local Input = pik:CreateInput({
+    Name = "Whitelist 2",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().getitem2 = t
+    end,
+ })
+
+ local Input = pik:CreateInput({
+    Name = "Whitelist 3",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().getitem3 = t
+
+    end,
+ })
+
+ local Input = pik:CreateInput({
+    Name = "Whitelist 4",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().getitem4 = t
+
+    end,
+ })
+
+ local Input = pik:CreateInput({
+    Name = "Whitelist 5",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().getitem5 = t
+
+    end,
+ })
+
+ local Input = pik:CreateInput({
+    Name = "Whitelist 6",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().getitem6 = t
+    end,
+ })
+
+ local Input = pik:CreateInput({
+    Name = "Whitelist 7",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().getitem7 = t
+    end,
+ })
+
+ local Slider = pr:CreateSlider({
+    Name = "Max Zoom",
+    Range = {100, 100000},
+    Increment = 1,
+    Suffix = "Studs",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+        game.Players.LocalPlayer.CameraMaxZoomDistance = t
+    end,
+ })
+
+
+
+ local Slider = pr:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 18.5},
+    Increment = 0.1,
+    Suffix = "Speed",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+                   _G.WS = t;
+                    local Humanoid = game:GetService("Players").LocalPlayer.Character.Humanoid;
+                    Humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+                    Humanoid.WalkSpeed = _G.WS;
+                    end)
+                    Humanoid.WalkSpeed = _G.WS;        
+    end,
+ })
+
+ local Slider = pr:CreateSlider({
+    Name = "Jump Power",
+    Range = {50, 65},
+    Increment = 0.1,
+    Suffix = "Height",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+game.Players.LocalPlayer.Character.Humanoid.JumpPower = t    
+    end,
+ })
+
+ local Slider = pr:CreateSlider({
+    Name = "Max Slope Angle",
+    Range = {49, 89},
+    Increment = 0.1,
+    Suffix = "Angle",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+game.Players.LocalPlayer.Character.Humanoid.MaxSlopeAngle = t
+    end,
+ })
+
+ local Slider = pr:CreateSlider({
+    Name = "Hip Height",
+    Range = {1, 5},
+    Increment = 0.1,
+    Suffix = "Height",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+game.Players.LocalPlayer.Character.Humanoid.HipHeight = t
+    end,
+ })
+
+ 
+ local Toggle = pr:CreateToggle({
+    Name = "No Animation",
+    CurrentValue = false,
+    Flag = "Toggle13",
+    Callback = function(t)
+        getgenv().tpcli = t
+        if getgenv().tpcli == true then
+        local anim = game.Players.LocalPlayer.Character.Animate
+        anim:Clone().Parent = game.StudioData
+        anim:Destroy()
+        end
+        if getgenv().tpcli == false then
+        local anim2 = game.StudioData.Animate
+        anim2.Parent = game.Players.LocalPlayer.Character
+        end
+    end,
+ })
+
+
+ 
+ local Toggle = pr:CreateToggle({
+    Name = "Infinite Jump",
+    CurrentValue = false,
+    Flag = "Toggle14",
+    Callback = function(t)
+        getgenv().chamsa = t
+                local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+                
+                mouse.KeyDown:connect(function(key)
+                    if getgenv().chamsa == true and key == " "  then
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState(3)
+        end
+        end)
+    end,
+})
+
+
+
+local Input = st:CreateInput({
+    Name = "Keybind Hut",
+    PlaceholderText = "Input Placeholder",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(t)
+        getgenv().htrkey = t
+    end,
+ })
+
+    local Toggle = st:CreateToggle({
+        Name = "Hut yourself",
+        CurrentValue = false,
+        Flag = "Toggle15",
+        Callback = function(t)
+            getgenv().htyour = t
+            local plr = game:GetService("Players").LocalPlayer
+            local char = plr.Character
+            local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+            local hum = char:FindFirstChild("HumanoidRootPart")
+            mouse.KeyDown:connect(function(key)
+                        mouse.KeyDown:connect(function(key)
+                            if getgenv().htyour == true and key == getgenv().htrkey then
+
+                                local cframe = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                                local a = cframe * CFrame.new(-1, -2.5, 1)
+                                local args = {
+                                    [1] = a.p,
+                                    [2] = "Big Ol' Hut",
+                                    [3] = 0,
+                                    [4] = false
+                                }
+                                
+                                game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("PlaceStructure"):FireServer(unpack(args))
+                            end   
+                end)
+            end)              
+        end,
+     })
+
+     local Input = st:CreateInput({
+        Name = "Keybind de hut",
+        PlaceholderText = "Input Placeholder",
+        RemoveTextAfterFocusLost = false,
+        Callback = function(t)
+            getgenv().htrkey = t
+        end,
+     })
+    
+local es = false
+         local Input = st:CreateInput({
+            Name = "Keybind Noclip All Doors / ON/OFF",
+            PlaceholderText = "Input Placeholder",
+            RemoveTextAfterFocusLost = false,
+            Callback = function(t)
+                getgenv().noclipall = t
+                game.Players.LocalPlayer:GetMouse().KeyDown:Connect(function(key)
+                    if key == getgenv().noclipall then
+            
+if es == false then
+    es = true
+else
+    es = false
+end
+if es == true then
+    for i, v in pairs(workspace.Deployables:GetDescendants()) do
+        if v.Name == "Door" and v:IsA("Part") then
+            if (v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude < 50 then
+                v.Transparency = 0.3
+                v.CanCollide = false
+            end
+        end
+    end
+else
+    for i, v in pairs(workspace.Deployables:GetDescendants()) do
+        if v.Name == "Door" and v:IsA("Part") then
+            if (v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude < 50 then
+                v.Transparency = 0
+                v.CanCollide = true
+            end
+        end
+    end
+        
+end
+end
+end)
+
+            end,
+         })
+
+local keyautoheal = false
+local mouse = game.Players.LocalPlayer:GetMouse()
+local keypressed = false
+
+-- Create GUI elements
+local Section = Heals:CreateSection("Speed - x1")
+
+local Slider = Heals:CreateSlider({
+    Name = "Start Auto Heal on: ",
+    Range = {1, 99},
+    Increment = 0.1,
+    Suffix = "Health",
+    CurrentValue = 0,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(t)
+        getgenv().sliderheal = t
+    end,
+ })
+
+         local Toggle = Heals:CreateToggle({
+             Name = "Bloodfruit - x1",
+             CurrentValue = false,
+             Flag = "Toggle16",
+             Callback = function(t)
+                getgenv().bloodfruit = t
+                while wait() do
+               
+                if getgenv().bloodfruit == true then
+if humanoid.Health < getgenv().sliderheal then
+    autoheal("Bloodfruit") 
+end end
+end
+             end,
+          })
+         
+
+        
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Berry - x1",
+             CurrentValue = false,
+             Flag = "Toggle17",
+             Callback = function(t)
+                getgenv().Berry1 = t
+                while wait() do
+               
+                    if getgenv().Berry1 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Berry")
+            
+            end
+            end
+        end
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Lemon - x1",
+             CurrentValue = false,
+             Flag = "Toggle18",
+             Callback = function(t)
+                getgenv().lemon1 = t
+                while wait() do
+               
+                if getgenv().lemon1 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Lemon") 
+                               end
+            end
+    end
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Jelly - x1",
+             CurrentValue = false,
+             Flag = "Toggle19",
+             Callback = function(t)
+                getgenv().jelly1 = t
+                while wait() do
+                if getgenv().jelly1 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Jelly")                end
+            
+        end
+        end
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Strawberry - x1",
+             CurrentValue = false,
+             Flag = "Toggle20",
+             Callback = function(t)
+                getgenv().strawberry1 = t
+                 while wait() do
+                if getgenv().strawberry == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Strawberry")
+                            
+            end
+        end
+    end
+             end,
+          })
+         
+          local Section = Heals:CreateSection("Speed - x4")
+         
+         local Toggle = Heals:CreateToggle({
+             Name = "Bloodfruit - x4",
+             CurrentValue = false,
+             Flag = "Toggle21",
+             Callback = function(t)
+                getgenv().bloodfruit4 = t
+                while wait() do
+               
+                if getgenv().bloodfruit4 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Bloodfruit")
+                    autoheal("Bloodfruit") 
+                    autoheal("Bloodfruit") 
+                    autoheal("Bloodfruit") 
+                end
+       
+            end
+        end
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Berry - x4",
+             CurrentValue = false,
+             Flag = "Toggle22",
+             Callback = function(t)
+                getgenv().berry4 = t
+                while wait() do
+               
+                if getgenv().berry4 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Berry") 
+                    autoheal("Berry") 
+                    autoheal("Berry") 
+                    autoheal("Berry") 
+
+                end
+            end
+
+            end
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Bluefruit - x4",
+             CurrentValue = false,
+             Flag = "Toggle23",
+             Callback = function(t)
+                getgenv().bluefruit4 = t
+                                while wait() do
+
+               
+                if getgenv().bluefruit4 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Bluefruit") 
+                    autoheal("Bluefruit") 
+                    autoheal("Bluefruit") 
+                    autoheal("Bluefruit") 
+                end
+            end
+                        end
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Lemon - x4",
+             CurrentValue = false,
+             Flag = "Toggle24",
+             Callback = function(t)
+                getgenv().lemom4 = t
+                while wait() do
+
+               
+                if getgenv().lemon4 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Lemon") 
+                    autoheal("Lemon") 
+                    autoheal("Lemon") 
+                    autoheal("Lemon") 
+                end
+                        end
+        end
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Jelly - x4",
+             CurrentValue = false,
+             Flag = "Toggle25",
+             Callback = function(t)
+                getgenv().jelly4 = t
+                while wait() do
+
+               
+                if getgenv().jelly4 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Jelly") 
+                    autoheal("Jelly") 
+                    autoheal("Jelly") 
+                    autoheal("Jelly") 
+                end
+            end
+  
+    end
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Strawberry - x4",
+             CurrentValue = false,
+             Flag = "Toggle26",
+             Callback = function(t)
+                while wait() do
+
+                getgenv().strawberry4 = t
+               
+                if getgenv().strawberry4 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                    autoheal("Strawberry") 
+                    autoheal("Strawberry") 
+                    autoheal("Strawberry") 
+                    autoheal("Strawberry") 
+                end
+            end
+        end
+             end,
+          })
+         
+          local Section = Heals:CreateSection("Speed - x5")
+         
+          local Toggle = Heals:CreateToggle({
+            Name = "Bloodfruit - x5",
+            CurrentValue = false,
+            Flag = "Toggle27",
+            Callback = function(t)
+            getgenv().bloodfruit5 = t
+            while wait() do
+
+           
+            if getgenv().bloodfruit5 == true then
+            if humanoid.Health < getgenv().sliderheal then
+            for i = 1, 5 do
+                autoheal("Bloodfruit") 
+            end
+            end
+        end
+ 
+        end
+            end,
+            })
+            
+            local Toggle = Heals:CreateToggle({
+            Name = "Berry - x5",
+            CurrentValue = false,
+            Flag = "Toggle28",
+            Callback = function(t)
+            getgenv().berry5 = t
+            while wait() do
+
+           
+            if getgenv().berry5 == true then
+            if humanoid.Health < getgenv().sliderheal then
+            for i = 1, 5 do
+                autoheal("Berry") 
+            end
+            end
+
+    end
+        end
+            end,
+            })
+            
+            local Toggle = Heals:CreateToggle({
+            Name = "Bluefruit - x5",
+            CurrentValue = false,
+            Flag = "Toggle29",
+            Callback = function(t)
+            getgenv().bluefruit5 = t
+            while wait() do
+
+           
+            if getgenv().bluefruit5 == true then
+            if humanoid.Health < getgenv().sliderheal then
+            for i = 1, 5 do
+                autoheal("Bluefruit") 
+            end
+            end
+        end
+
+        end
+            end,
+            })
+            
+            local Toggle = Heals:CreateToggle({
+            Name = "Lemon - x5",
+            CurrentValue = false,
+            Flag = "Toggle1",
+            Callback = function(t)
+            getgenv().lemon5 = t
+            while wait() do
+
+           
+            if getgenv().lemon5 == true then
+            if humanoid.Health < getgenv().sliderheal then
+            for i = 1, 5 do
+                autoheal("Lemon") 
+            end
+            end
+ 
+            end
+        end
+            end,
+            })
+            
+            local Toggle = Heals:CreateToggle({
+            Name = "Jelly - x5",
+            CurrentValue = false,
+            Flag = "Toggle30",
+            Callback = function(t)
+            getgenv().jelly5 = t
+            while wait() do
+
+           
+            if getgenv().jelly5 == true then
+            if humanoid.Health < getgenv().sliderheal then
+            for i = 1, 5 do
+                autoheal("Jelly") 
+            end
+            end
+        end
+     
+        end
+            end,
+            })
+
+            local Toggle = Heals:CreateToggle({
+                Name = "Strawberry - x5",
+                CurrentValue = false,
+                Flag = "Toggle31",
+                Callback = function(t)
+                getgenv().strawberry5 = t
+                while wait() do
+
+               
+                if getgenv().strawberry5 == true then
+                if humanoid.Health < getgenv().sliderheal then
+                for i = 1, 5 do
+                    autoheal("Strawberry") 
+                end
+                end
+            end
+                end
+         
+                end,
+                })
+         
+         local Input = Heals:CreateInput({
+            Name = "Speed (4 recommended)",
+            PlaceholderText = "Input Placeholder",
+            RemoveTextAfterFocusLost = false,
+            Callback = function(t)
+             getgenv().nospeed = t
+            end,
+         })
+         
+         local Input = Heals:CreateInput({
+             Name = "Fruit",
+             PlaceholderText = "Input Placeholder",
+             RemoveTextAfterFocusLost = false,
+             Callback = function(t)
+              getgenv().nono = t
+             end,
+          })
+         
+          local Toggle = Heals:CreateToggle({
+             Name = "Start AutoHeal",
+             CurrentValue = false,
+             Flag = "Toggle32",
+             Callback = function(t)
+                 getgenv().myautoheal = t
+                 spawn(function()
+                     while getgenv().myautoheal == true and wait() do
+                         function food()
+                             for i=1, getgenv().nospeed do
+                                autoheal(getgenv().nono) 
+                            end
+                             end
+                             if game.Players.LocalPlayer.Character.Humanoid.Health < 100 then
+                             food()
+                             end
+                     end
+                 end)
+             end,
+          })
+
+          local Tab = Window:CreateTab("GUI", 4483362458) -- Title, Image
+
+          local Section = Tab:CreateSection("Destroy Gui")
+
+          local Button = Tab:CreateButton({
+            Name = "Destroy GUI",
+            Callback = function(qoa)
+            -- The function that takes place when the button is pressed
+            Rayfield:Destroy()
+            end,
+         })
+
+         Rayfield:LoadConfiguration()
 
